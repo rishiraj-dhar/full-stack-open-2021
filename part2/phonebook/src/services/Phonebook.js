@@ -7,14 +7,21 @@ const readContacts = async () => {
     return response.data;
 };
 
-const addContact = async (contact) => {
-    const response = await axios.post(baseURL, contact);
+const addContact = async (newContact) => {
+    const response = await axios.post(baseURL, newContact);
+    return response.data;
+};
+
+const updateContact = async (updatedContact) => {
+    const response = await axios.put(`${baseURL}/${updatedContact.id}`, updatedContact);
     return response.data;
 };
 
 const deleteContact = async (contactID) => {
     const response = await axios.delete(`${baseURL}/${contactID}`);
     return response.data;
-}; 
+};
 
-export default { readContacts, addContact, deleteContact };
+const Phonebook = { readContacts, addContact, updateContact, deleteContact };
+
+export default Phonebook;
