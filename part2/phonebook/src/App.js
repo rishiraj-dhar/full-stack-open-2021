@@ -17,7 +17,7 @@ const Button = ({ handleClick, text }) => {
   );
 };
 
-const FilteredPersons = ({persons, nameFilter}) => {
+const FilteredPersons = ({persons, nameFilter, handleDeletePerson}) => {
   const personsToShow = persons.filter(person => (
       person.name.toLowerCase()
       .includes(nameFilter.toLowerCase())
@@ -28,7 +28,7 @@ const FilteredPersons = ({persons, nameFilter}) => {
       {personsToShow.map(
         person => (
           <p key={person.id}>
-            {person.name} {person.number}
+            {person.name} {person.number} <button onClick={() => { handleDeletePerson(person) }} >delete</button>
           </p>
         ))}
     </>
@@ -83,6 +83,16 @@ const App = () => {
       });
   };
 
+  const handleDeletePerson = (personToDelete) => {
+    if (window.confirm(`Delete ${personToDelete.name} ?`)) {
+      Phonebook.deleteContact(personToDelete.id)
+        .then(() => {
+          const newPersons = persons.filter(person => person.id !== personToDelete.id);
+          setPersons(newPersons);
+        });
+    };
+  };
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -94,7 +104,7 @@ const App = () => {
         <Button handleClick={handleAddPerson} text="add" />
       </form>
       <h2>Numbers</h2>
-      <FilteredPersons persons={persons} nameFilter={nameFilter} />
+      <FilteredPersons persons={persons} nameFilter={nameFilter} handleDeletePerson={handleDeletePerson} />
     </div>
   );
 };

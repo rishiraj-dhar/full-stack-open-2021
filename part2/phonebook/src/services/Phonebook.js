@@ -12,4 +12,9 @@ const addContact = async (contact) => {
     return response.data;
 };
 
-export default { readContacts, addContact };
+const deleteContact = async (contactID) => {
+    const response = await axios.delete(`${baseURL}/${contactID}`);
+    return response.data;
+}; 
+
+export default { readContacts, addContact, deleteContact };
