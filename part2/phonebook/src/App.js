@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import Phonebook from './services/Phonebook';
 
 const TextInput = ({ labelText, value, handleInput }) => {
   return (
@@ -43,9 +43,8 @@ const App = () => {
   const [nameFilter, setNameFilter] = useState('');
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => setPersons(response.data))
+    Phonebook.readContacts()
+      .then(contacts => setPersons(contacts));
   }, []);
 
   const handleNameFilterInput = (e) => {
@@ -72,13 +71,12 @@ const App = () => {
     const newPerson = {
       name: newName,
       number: newNumber,
-      id: persons.length + 1
+      id: persons[persons.length - 1].id + 1
     }
 
-    axios
-      .post('http://localhost:3001/persons', newPerson)
-      .then(response => {
-        const newPersons = persons.concat(response.data);
+    Phonebook.addContact(newPerson)
+      .then(contactData => {
+        const newPersons = persons.concat(contactData);
         setPersons(newPersons);
         setNewName('');
         setNewNumber('');
