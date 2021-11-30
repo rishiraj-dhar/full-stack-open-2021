@@ -24,9 +24,13 @@ const persons = [
     }
 ];
 
+// get all contacts
+
 app.get('/api/persons', (req, res) => {
     res.json(persons);
 });
+
+// get individual contact
 
 app.get('/api/persons/:id', (req, res) => {
     const personID = Number(req.params.id);
@@ -35,8 +39,21 @@ app.get('/api/persons/:id', (req, res) => {
     if (requestedPerson) {
         res.json(requestedPerson);
     } else {
-        res.status(404).json({ message: 'Person not found!' });
+        res.status(404).json({ message: 'Contact not found!' });
     }
+});
+
+// delete individual contact
+
+app.delete('/api/persons/:id', (req, res) => {
+    const personID = Number(req.params.id);
+    const personIndex = persons.findIndex(person => person.id === personID);
+    if (personIndex !== -1) {
+        persons.splice(personIndex, 1);
+        res.status(204).end();
+    } else {
+        res.status(404).json({message: 'Contact does not exist!'});
+    };    
 });
 
 app.get('/info', (req, res) => {
