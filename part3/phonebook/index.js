@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 
+app.use(express.json());
+
 const persons = [
     { 
       "id": 1,
@@ -23,6 +25,19 @@ const persons = [
       "number": "39-23-6423122"
     }
 ];
+
+// generate Random ContactID
+
+const generateContactID = () => {
+    let generatedID;
+    while (true) {
+        generatedID = Math.floor(Math.random() * 10000);
+        if (!persons.some(person => person.id === generatedID)) {
+            break;
+        }
+    }
+    return generatedID;
+};
 
 // get all contacts
 
@@ -54,6 +69,20 @@ app.delete('/api/persons/:id', (req, res) => {
     } else {
         res.status(404).json({message: 'Contact does not exist!'});
     };    
+});
+
+// add new contact
+
+app.post('/api/persons', (req, res) => {
+    const newContact = req.body;
+
+    if (!newContact.name) {
+        return res.status(404).json({ message: "'name' property cannot be blank!" });
+    }
+
+    newContact.id = generateContactID();
+    persons.push(newContact);
+    res.json(newContact);
 });
 
 app.get('/info', (req, res) => {
