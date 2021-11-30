@@ -76,8 +76,19 @@ app.delete('/api/persons/:id', (req, res) => {
 app.post('/api/persons', (req, res) => {
     const newContact = req.body;
 
+    // CHECK: name is missing
     if (!newContact.name) {
-        return res.status(404).json({ message: "'name' property cannot be blank!" });
+        return res.status(404).json({ message: "name is missing!" });
+    }
+
+    // CHECK: number is missing
+    if (!newContact.number) {
+        return res.status(404).json({ message: "number is missing!" });
+    }
+
+    // CHECK: name already exists
+    if (persons.some(person => person.name === newContact.name)) {
+        return res.status(404).json({ message: "name already exists!" });
     }
 
     newContact.id = generateContactID();
