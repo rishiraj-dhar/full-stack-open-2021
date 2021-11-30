@@ -28,6 +28,15 @@ app.get('/api/persons', (req, res) => {
     res.json(persons);
 });
 
+app.get('/info', (req, res) => {
+    const people = persons.length;
+    const dateRightNow = new Date();
+    res.send(
+        `<p>Phonebook has info for ${people} ${(people === 1) ? 'person' : 'people'}</p>
+        <p>${dateRightNow.toString()}</p>`
+    );
+});
+
 const PORT = 3001;
 
 app.listen(PORT, () => {
