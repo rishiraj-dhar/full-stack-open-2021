@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const Contact = require('./models/contact');
 const app = express();
 
 app.use(cors());
@@ -54,20 +55,21 @@ const generateContactID = () => {
 // get all contacts
 
 app.get('/api/persons', (req, res) => {
-    res.json(persons);
+    Contact.find({})
+        .then(persons => res.json(persons));    
 });
 
 // get individual contact
 
 app.get('/api/persons/:id', (req, res) => {
-    const personID = Number(req.params.id);
-    const requestedPerson = persons.find(person => person.id === personID);
-
-    if (requestedPerson) {
-        res.json(requestedPerson);
-    } else {
-        res.status(404).json({ message: 'Contact not found!' });
-    }
+    Contact.findById(req.params.id)
+        .then(requestedPerson => {
+            if (requestedPerson) {
+                res.json(requestedPerson);
+            } else {
+                res.status(404).json({ message: 'Contact not found!' });
+            }
+        });
 });
 
 // delete individual contact
@@ -117,7 +119,7 @@ app.get('/info', (req, res) => {
     );
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
