@@ -16,47 +16,12 @@ morgan.token('req-body', (req, res) => {
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :req-body'));
 
-const persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-33-6423122"
-    }
-];
-
-// generate Random ContactID
-
-const generateContactID = () => {
-    let generatedID;
-    while (true) {
-        generatedID = Math.floor(Math.random() * 10000);
-        if (!persons.some(person => person.id === generatedID)) {
-            break;
-        }
-    }
-    return generatedID;
-};
-
 // get all contacts
 
-app.get('/api/persons', (req, res) => {
+app.get('/api/persons', (req, res, next) => {
     Contact.find({})
-        .then(persons => res.json(persons));    
+        .then(persons => res.json(persons))
+        .catch(err => next(err));    
 });
 
 // get individual contact
@@ -87,9 +52,17 @@ app.delete('/api/persons/:id', (req, res, next) => {
         .catch(err => next(err));
 });
 
+// update individual contact
+
+app.put('/api/persons/:id', (req, res, next) => {
+    Contact.findByIdAndUpdate(req.params.id, { number: req.body.number }, { new: true })
+        .then(updatedContact => res.json(updatedContact))
+        .catch(err => next(err));
+});
+
 // add new contact
 
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
     
     // CHECK: name is missing
     if (!req.body.name) {
@@ -110,16 +83,20 @@ app.post('/api/persons', (req, res) => {
     newContact.save()
         .then(result => {
             res.json(result);
-        });
+        })
+        .catch(err => next(err));
 });
 
 app.get('/info', (req, res) => {
-    const people = persons.length;
-    const dateRightNow = new Date();
-    res.send(
-        `<p>Phonebook has info for ${people} ${(people === 1) ? 'person' : 'people'}</p>
-        <p>${dateRightNow.toString()}</p>`
-    );
+    Contact.find({})
+        .then(persons => {            
+            const people = persons.length;
+            const dateRightNow = new Date();
+            res.send(
+                `<p>Phonebook has info for ${people} ${(people === 1) ? 'person' : 'people'}</p>
+                <p>${dateRightNow.toString()}</p>`
+            );
+        });
 });
 
 const unknownEndpoint = (req, res) => {
