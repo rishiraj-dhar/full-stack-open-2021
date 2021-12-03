@@ -88,26 +88,26 @@ app.delete('/api/persons/:id', (req, res) => {
 // add new contact
 
 app.post('/api/persons', (req, res) => {
-    const newContact = {...req.body}; // creates copy of data, so that newContact.id assignment does not affect req.body
-
+    
     // CHECK: name is missing
-    if (!newContact.name) {
+    if (!req.body.name) {
         return res.status(404).json({ message: "name is missing!" });
     }
 
     // CHECK: number is missing
-    if (!newContact.number) {
+    if (!req.body.number) {
         return res.status(404).json({ message: "number is missing!" });
     }
 
     // CHECK: name already exists
-    if (persons.some(person => person.name === newContact.name)) {
-        return res.status(404).json({ message: "name already exists!" });
-    }
+    // if (persons.some(person => person.name === newContact.name)) {
+    //     return res.status(404).json({ message: "name already exists!" });
+    // }
 
-    newContact.id = generateContactID();
-    persons.push(newContact);
-    res.json(newContact);
+    const newContact = new Contact(req.body);
+    newContact.save().then(result => {
+        res.json(result);
+    });
 });
 
 app.get('/info', (req, res) => {
