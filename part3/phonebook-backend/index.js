@@ -61,7 +61,7 @@ app.get('/api/persons', (req, res) => {
 
 // get individual contact
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
     Contact.findById(req.params.id)
         .then(requestedPerson => {
             if (requestedPerson) {
@@ -69,20 +69,22 @@ app.get('/api/persons/:id', (req, res) => {
             } else {
                 res.status(404).json({ message: 'Contact not found!' });
             }
-        });
+        })
+        .catch(err => next(err));
 });
 
 // delete individual contact
 
-app.delete('/api/persons/:id', (req, res) => {
-    const personID = Number(req.params.id);
-    const personIndex = persons.findIndex(person => person.id === personID);
-    if (personIndex !== -1) {
-        persons.splice(personIndex, 1);
-        res.status(204).end();
-    } else {
-        res.status(404).json({message: 'Contact does not exist!'});
-    };    
+app.delete('/api/persons/:id', (req, res, next) => {
+    Contact.findByIdAndDelete(req.params.id)
+        .then(result => {
+            if (result) {          
+                res.status(204).end();
+            } else {
+                res.status(404).json({message: 'Contact does not exist!'}); 
+            };
+        })
+        .catch(err => next(err));
 });
 
 // add new contact
@@ -105,9 +107,10 @@ app.post('/api/persons', (req, res) => {
     // }
 
     const newContact = new Contact(req.body);
-    newContact.save().then(result => {
-        res.json(result);
-    });
+    newContact.save()
+        .then(result => {
+            res.json(result);
+        });
 });
 
 app.get('/info', (req, res) => {
@@ -118,6 +121,22 @@ app.get('/info', (req, res) => {
         <p>${dateRightNow.toString()}</p>`
     );
 });
+
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({ error: 'unknown endpoint' });
+};
+
+app.use(unknownEndpoint);
+
+const errorHandler = (err, req, res, next) => {
+    console.error(err.message);
+    if (err.name === 'CastError') {
+        return res.status(400).send({ error: 'malformatted id' });
+    };
+    next(err);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 
